@@ -5,7 +5,7 @@ import { useQuoteCart } from "../context/QuoteCartContext"
 import { useLanguage } from "../context/LanguageContext"
 import { useCatalog } from "../context/CatalogContext"
 import ProductImage from "../components/product/ProductImage"
-import { displayName } from "../lib/format"
+import { displayName, findProduct } from "../lib/format"
 
 export default function QuotePage() {
   const { items, updateQuantity, removeItem, clear } = useQuoteCart()
@@ -28,6 +28,8 @@ export default function QuotePage() {
       source: "quote",
       items: items.map((item) => ({
         sku: item.sku,
+        specId: item.specId,
+        label: item.label,
         name: item.name,
         color: item.color,
         quantity: item.quantity,
@@ -63,7 +65,7 @@ export default function QuotePage() {
         ) : (
           <div className="mt-6 space-y-4">
             {items.map((item) => {
-              const product = products.find((entry) => entry.sku === item.sku)
+              const product = findProduct(products, item.id) || findProduct(products, item.sku)
               return (
                 <div key={item.key} className="flex gap-4 rounded-[14px] border border-line p-4">
                   <div className="h-24 w-24 overflow-hidden rounded-xl bg-cream">
@@ -71,7 +73,7 @@ export default function QuotePage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-medium">{displayName(item, lang)}</p>
-                    <p className="sku text-xs text-muted">SKU: {item.sku}</p>
+                    <p className="sku text-xs text-muted">SKU: {item.sku}{item.label ? ` · ${item.label}` : ""}</p>
                     <p className="mt-1 text-sm text-muted">
                       {t.color}: {item.color}
                     </p>

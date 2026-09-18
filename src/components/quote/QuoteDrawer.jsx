@@ -3,7 +3,7 @@ import { Minus, Plus, Trash2, X } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { useQuoteCart } from "../../context/QuoteCartContext"
 import { useLanguage } from "../../context/LanguageContext"
-import { displayName, formatPrice } from "../../lib/format"
+import { displayName, findProduct } from "../../lib/format"
 import ProductImage from "../product/ProductImage"
 import { useCatalog } from "../../context/CatalogContext"
 
@@ -47,7 +47,7 @@ export default function QuoteDrawer() {
               ) : (
                 <div className="space-y-4">
                   {items.map((item) => {
-                    const product = products.find((entry) => entry.sku === item.sku)
+                    const product = findProduct(products, item.id) || findProduct(products, item.sku)
                     return (
                       <div key={item.key} className="flex gap-3 rounded-[14px] border border-line p-3">
                         <div className="h-20 w-20 overflow-hidden rounded-xl bg-cream">
@@ -55,7 +55,7 @@ export default function QuoteDrawer() {
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="truncate font-medium">{displayName(item, lang)}</p>
-                          <p className="sku text-xs text-muted">SKU: {item.sku}</p>
+                          <p className="sku text-xs text-muted">SKU: {item.sku}{item.label ? ` · ${item.label}` : ""}</p>
                           <p className="mt-1 text-xs text-muted">
                             {t.color}: {item.color}
                           </p>

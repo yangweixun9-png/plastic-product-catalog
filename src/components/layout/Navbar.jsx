@@ -4,7 +4,7 @@ import { Menu, Search, ShoppingBag, X } from "lucide-react"
 import { useLanguage } from "../../context/LanguageContext"
 import { useQuoteCart } from "../../context/QuoteCartContext"
 import { useCatalog } from "../../context/CatalogContext"
-import { displayName, formatPrice, productSearchText } from "../../lib/format"
+import { displayName, displayPrice, firstImage, matchingVariant, productHref, productSearchText, seriesSkuLabel } from "../../lib/format"
 import ProductImage from "../product/ProductImage"
 
 const links = [
@@ -205,26 +205,28 @@ export default function Navbar() {
               </button>
             </form>
             <div className="max-h-[60vh] overflow-y-auto p-2">
-              {results.map((product) => (
+              {results.map((product) => {
+                const variant = matchingVariant(product, query)
+                return (
                 <button
-                  key={product.sku}
+                  key={product.id}
                   type="button"
                   onClick={() => {
                     setSearchOpen(false)
-                    navigate(`/products/${encodeURIComponent(product.sku)}`)
+                    navigate(productHref(product, variant))
                   }}
                   className="flex w-full items-center gap-3 rounded-xl p-2 text-left hover:bg-cream"
                 >
                   <div className="h-12 w-12 overflow-hidden rounded-lg bg-cream">
-                    <ProductImage product={product} />
+                    <ProductImage product={product} src={firstImage(product, variant)} sku={variant?.sku} />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium">{displayName(product, lang)}</p>
-                    <p className="sku text-xs text-muted">SKU: {product.sku}</p>
+                    <p className="sku text-xs text-muted">SKU: {variant?.sku || seriesSkuLabel(product)}</p>
                   </div>
-                  <p className="text-sm font-semibold text-brand-hover">{formatPrice(product.price, lang)}</p>
+                  <p className="text-sm font-semibold text-brand-hover">{displayPrice(variant || product, lang)}</p>
                 </button>
-              ))}
+              )})}
               {query.trim() && results.length === 0 && (
                 <p className="px-3 py-8 text-center text-sm text-muted">{t.noResults}</p>
               )}

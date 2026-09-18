@@ -1,5 +1,6 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { colorHex } from "../../lib/colors"
+import { firstImage } from "../../lib/format"
 
 function RackArt({ accent }) {
   return (
@@ -62,10 +63,14 @@ export default function ProductImage({
   sku,
 }) {
   const [failed, setFailed] = useState(false)
-  const url = src || product?.images?.[0]
+  const url = src || firstImage(product)
   const code = sku || product?.sku || "—"
   const accent = colorHex(color || product?.colors?.[0] || "黄色")
   const Art = artFor(product)
+
+  useEffect(() => {
+    setFailed(false)
+  }, [url])
 
   const placeholder = (
     <div
@@ -89,7 +94,8 @@ export default function ProductImage({
       <img
         src={url}
         alt={alt || product?.name || code}
-        className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
+        draggable={false}
+        className="h-full w-full object-contain"
         onError={() => setFailed(true)}
       />
     </div>

@@ -1,5 +1,6 @@
 import { createContext, useContext, useMemo, useState } from "react"
 import { readStore, writeStore } from "../lib/storage"
+import { firstImage, getVariant } from "../lib/format"
 
 const QuoteCartContext = createContext(null)
 
@@ -12,9 +13,10 @@ export function QuoteCartProvider({ children }) {
     writeStore("quote", next)
   }
 
-  const addItem = (product, { color, quantity = 1 } = {}) => {
+  const addItem = (product, { color, quantity = 1, variant } = {}) => {
+    const selected = variant || getVariant(product, 0)
     const selectedColor = color || product.colors?.[0] || ""
-    const key = `${product.sku}__${selectedColor}`
+    const key = `${product.id}__${selected?.specId || selected?.sku}__${selectedColor}`
     const exists = items.find((item) => item.key === key)
     const next = exists
       ? items.map((item) =>
@@ -25,13 +27,16 @@ export function QuoteCartProvider({ children }) {
           {
             key,
             id: product.id,
-            sku: product.sku,
+            sku: selected?.sku,
+            specId: selected?.specId || selected?.sku,
+            label: selected?.label || "",
             name: product.name,
             nameEn: product.nameEn,
-            image: product.images?.[0] || "",
+            image: firstImage(product, selected),
             color: selectedColor,
             quantity,
-            price: product.price,
+            price: selected?.price,
+            pricePending: selected?.pricePending,
           },
         ]
     persist(next)

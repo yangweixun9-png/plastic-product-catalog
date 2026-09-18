@@ -6,7 +6,7 @@ import { useCatalog } from "../context/CatalogContext"
 import { useLanguage } from "../context/LanguageContext"
 import FilterPanel from "../components/product/FilterPanel"
 import ProductCard from "../components/product/ProductCard"
-import { productSearchText } from "../lib/format"
+import { productSearchText, matchingVariantIndex, sortPriceValue, variantMatchesSize, variantMatchesSku, variantPriceInRange } from "../lib/format"
 
 const PAGE_SIZE = 24
 
@@ -48,7 +48,7 @@ export default function Products({ forcedNew = false, titleKey = "allProducts" }
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     let list = products.filter((product) => {
-      if (q && !productSearchText(product).includes(q) && !product.sku.toLowerCase().includes(q)) {
+      if (q && !productSearchText(product).includes(q)) {
         return false
       }
       if (filters.category && filters.category !== "all" && product.category !== filters.category) {
@@ -57,12 +57,13 @@ export default function Products({ forcedNew = false, titleKey = "allProducts" }
       if (filters.colors.length && !filters.colors.some((color) => product.colors.includes(color))) {
         return false
       }
-      if (filters.minPrice !== "" && product.price < Number(filters.minPrice)) return false
-      if (filters.maxPrice !== "" && product.price > Number(filters.maxPrice)) return false
-      if (filters.size && !(product.dimensions || "").toLowerCase().includes(filters.size.toLowerCase())) {
+      if ((filters.minPrice !== "" || filters.maxPrice !== "") && !variantPriceInRange(product, filters.minPrice, filters.maxPrice)) {
         return false
       }
-      if (filters.sku && !product.sku.toLowerCase().includes(filters.sku.trim().toLowerCase())) {
+      if (filters.size && !variantMatchesSize(product, filters.size)) {
+        return false
+      }
+      if (filters.sku && !variantMatchesSku(product, filters.sku)) {
         return false
       }
       if ((forcedNew || filters.newOnly) && !product.isNew) return false
@@ -70,8 +71,12 @@ export default function Products({ forcedNew = false, titleKey = "allProducts" }
       return true
     })
 
-    if (sort === "price-asc") list = [...list].sort((a, b) => a.price - b.price)
-    if (sort === "price-desc") list = [...list].sort((a, b) => b.price - a.price)
+    if (sort === "price-asc") {
+      list = [...list].sort((a, b) => sortPriceValue(a) - sortPriceValue(b))
+    }
+    if (sort === "price-desc") {
+      list = [...list].sort((a, b) => sortPriceValue(b) - sortPriceValue(a))
+    }
     if (sort === "newest") {
       list = [...list].sort((a, b) => {
         if (a.isNew !== b.isNew) return a.isNew ? -1 : 1
@@ -182,7 +187,7 @@ export default function Products({ forcedNew = false, titleKey = "allProducts" }
           ) : (
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
               {pageItems.map((product) => (
-                <ProductCard key={product.sku} product={product} />
+                <ProductCard key={product.id} product={product} initialVariantIndex={matchingVariantIndex(product, query || filters.sku)} />
               ))}
             </div>
           )}

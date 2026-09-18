@@ -1,4 +1,4 @@
-import { FILTER_COLORS, colorHex } from "../../lib/colors"
+import { colorHex } from "../../lib/colors"
 import { useLanguage } from "../../context/LanguageContext"
 import { CATEGORIES } from "../../data/categories"
 
@@ -9,11 +9,7 @@ export default function FilterPanel({
   onClear,
 }) {
   const { lang, t } = useLanguage()
-  const availableColors = FILTER_COLORS.filter(
-    (color) =>
-      products.some((product) => product.colors.includes(color)) ||
-      ["白色", "灰色", "黄色", "蓝色", "绿色", "橙色", "粉色"].includes(color),
-  )
+  const availableColors = [...new Set(products.flatMap((product) => product.colors || []))]
 
   const set = (patch) => onChange({ ...filters, ...patch })
 

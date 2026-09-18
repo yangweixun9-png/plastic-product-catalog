@@ -1,18 +1,30 @@
 import { createContext, useContext, useMemo, useState } from "react"
-import { PRODUCTS } from "../data/products"
+import { DATA_VERSION, PRODUCTS } from "../data/products"
 import { CATEGORIES } from "../data/categories"
 import { readStore, writeStore } from "../lib/storage"
 
 const CatalogContext = createContext(null)
 
 function cloneProducts() {
-  return PRODUCTS.map((item) => ({ ...item, colors: [...item.colors], images: [...item.images] }))
+  return PRODUCTS.map((item) => ({
+    ...item,
+    colors: [...(item.colors || [])],
+    variants: (item.variants || []).map((variant) => ({
+      ...variant,
+      images: [...(variant.images || [])],
+    })),
+  }))
 }
 
 export function CatalogProvider({ children }) {
   const [products, setProducts] = useState(() => {
+    const version = readStore("dataVersion", null)
     const stored = readStore("products", null)
-    return stored?.length ? stored : cloneProducts()
+    if (version === DATA_VERSION && stored?.length) return stored
+    const fresh = cloneProducts()
+    writeStore("products", fresh)
+    writeStore("dataVersion", DATA_VERSION)
+    return fresh
   })
   const [inquiries, setInquiries] = useState(() => readStore("inquiries", []))
   const [settings, setSettings] = useState(() =>
@@ -46,7 +58,7 @@ export function CatalogProvider({ children }) {
     if (exists) {
       next = products.map((item) => (item.id === product.id ? { ...product, updatedAt: now } : item))
     } else {
-      const nextId = Math.max(0, ...products.map((item) => Number(item.id) || 0)) + 1
+      const nextId = product.id || `product-${Date.now()}`
       next = [{ ...product, id: nextId, updatedAt: now }, ...products]
     }
     persistProducts(next)
@@ -75,14 +87,13 @@ export function CatalogProvider({ children }) {
 
   const importProducts = (rows) => {
     const now = new Date().toISOString().slice(0, 10)
-    let nextId = Math.max(0, ...products.map((item) => Number(item.id) || 0))
-    const incoming = rows.map((row) => {
-      nextId += 1
+    const incoming = rows.map((row, index) => {
+      const sku = String(row.sku || `NEW-${Date.now()}-${index}`)
+      const price = row.price === "" || row.price == null ? null : Number(row.price)
       return {
-        id: nextId,
+        id: `import-${Date.now()}-${index}`,
         name: row.name || "",
         nameEn: row.nameEn || row.name || "",
-        sku: String(row.sku || `NEW-${nextId}`),
         category: row.category || "家居用品",
         colors: Array.isArray(row.colors)
           ? row.colors
@@ -90,23 +101,29 @@ export function CatalogProvider({ children }) {
               .split(/[\/,，]/)
               .map((item) => item.trim())
               .filter(Boolean),
-        dimensions: row.dimensions || "",
-        foldSize: row.foldSize || "",
-        packingQuantity: row.packingQuantity === "" ? "" : Number(row.packingQuantity) || row.packingQuantity || "",
-        cartonSize: row.cartonSize || "",
-        netWeight: row.netWeight || "",
-        grossWeight: row.grossWeight || "",
-        unitNetWeight: row.unitNetWeight || "",
-        cartonGrossWeight: row.cartonGrossWeight || "",
-        hq40: row.hq40 || "",
-        price: Number(row.price) || 0,
-        currency: row.currency || "RMB",
-        images: row.images?.length ? row.images : [`/products/${row.sku || nextId}.svg`],
-        isNew: row.isNew === true || row.isNew === "true" || row.isNew === "1",
         status: row.status || "active",
+        isNew: row.isNew === true || row.isNew === "true" || row.isNew === "1",
         updatedAt: now,
         description: row.description || "",
         descriptionEn: row.descriptionEn || "",
+        variants: [
+          {
+            label: row.label || "默认",
+            sku,
+            specId: row.specId || sku,
+            price,
+            pricePending: row.pricePending === true || row.pricePending === "true" || price == null,
+            priceType: row.priceType || "",
+            size: row.dimensions || row.size || "",
+            foldSize: row.foldSize || "",
+            packingQuantity: row.packingQuantity === "" ? "" : Number(row.packingQuantity) || row.packingQuantity || "",
+            cartonSize: row.cartonSize || "",
+            netWeight: row.netWeight || "",
+            grossWeight: row.grossWeight || "",
+            hq40: row.hq40 || "",
+            images: row.images?.length ? row.images : [],
+          },
+        ],
       }
     })
     persistProducts([...incoming, ...products])
@@ -114,6 +131,7 @@ export function CatalogProvider({ children }) {
 
   const resetDemo = () => {
     persistProducts(cloneProducts())
+    writeStore("dataVersion", DATA_VERSION)
     persistInquiries([])
   }
 

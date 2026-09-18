@@ -2,7 +2,7 @@ import { Link } from "react-router-dom"
 import { Box, Inbox, Users, FileSpreadsheet } from "lucide-react"
 import { useCatalog } from "../../context/CatalogContext"
 import { useLanguage } from "../../context/LanguageContext"
-import { formatPrice } from "../../lib/format"
+import { displayPrice, seriesSkuLabel } from "../../lib/format"
 
 export default function Dashboard() {
   const { products, categories, inquiries, customers } = useCatalog()
@@ -38,12 +38,12 @@ export default function Dashboard() {
         </div>
         <div className="divide-y divide-line">
           {newest.map((product) => (
-            <div key={product.sku} className="flex items-center justify-between px-5 py-3 text-sm">
+            <div key={product.id} className="flex items-center justify-between px-5 py-3 text-sm">
               <div>
                 <p className="font-medium">{product.name}</p>
-                <p className="sku text-xs text-muted">{product.sku}</p>
+                <p className="sku text-xs text-muted">{seriesSkuLabel(product)}</p>
               </div>
-              <p className="font-semibold text-brand-hover">{formatPrice(product.price)}</p>
+              <p className="font-semibold text-brand-hover">{displayPrice(product)}</p>
             </div>
           ))}
         </div>

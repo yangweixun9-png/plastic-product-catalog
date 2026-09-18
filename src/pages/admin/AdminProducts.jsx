@@ -3,7 +3,7 @@ import { Pencil, Plus, Search, Trash2 } from "lucide-react"
 import { useCatalog } from "../../context/CatalogContext"
 import { useLanguage } from "../../context/LanguageContext"
 import ProductImage from "../../components/product/ProductImage"
-import { formatPrice } from "../../lib/format"
+import { displayPrice, productSearchText, seriesSkuLabel } from "../../lib/format"
 import ProductModal from "./ProductModal"
 
 export default function AdminProducts() {
@@ -15,9 +15,7 @@ export default function AdminProducts() {
   const list = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return products
-    return products.filter((product) =>
-      [product.name, product.sku, product.category].join(" ").toLowerCase().includes(q),
-    )
+    return products.filter((product) => productSearchText(product).includes(q))
   }, [products, query])
 
   return (
@@ -69,17 +67,17 @@ export default function AdminProducts() {
           </thead>
           <tbody>
             {list.map((product) => (
-              <tr key={product.sku} className="border-b border-line last:border-0">
+              <tr key={product.id} className="border-b border-line last:border-0">
                 <td className="px-4 py-3">
                   <div className="h-12 w-12 overflow-hidden rounded-lg bg-cream">
                     <ProductImage product={product} />
                   </div>
                 </td>
                 <td className="px-4 py-3 font-medium">{product.name}</td>
-                <td className="sku px-4 py-3 text-muted">{product.sku}</td>
+                <td className="sku px-4 py-3 text-muted">{seriesSkuLabel(product)}</td>
                 <td className="px-4 py-3">{product.category}</td>
-                <td className="px-4 py-3 text-muted">{product.colors.join(" / ")}</td>
-                <td className="px-4 py-3 font-semibold text-brand-hover">{formatPrice(product.price)}</td>
+                <td className="px-4 py-3 text-muted">{(product.colors || []).join(" / ")}</td>
+                <td className="px-4 py-3 font-semibold text-brand-hover">{displayPrice(product)}</td>
                 <td className="px-4 py-3">
                   <span className={`rounded-full px-2 py-1 text-xs ${product.status === "active" ? "bg-cream" : "bg-neutral-100"}`}>
                     {product.status === "active" ? t.active : t.draft}
@@ -94,7 +92,7 @@ export default function AdminProducts() {
                     <button
                       type="button"
                       onClick={() => {
-                        if (confirm(`${t.delete} ${product.sku}?`)) deleteProduct(product.id)
+                        if (confirm(`${t.delete} ${product.name}?`)) deleteProduct(product.id)
                       }}
                       className="rounded-full p-1.5 hover:bg-cream"
                     >

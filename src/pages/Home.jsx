@@ -4,17 +4,25 @@ import { ArrowRight, Factory, Package, Sparkles, Truck } from "lucide-react"
 import { useCatalog } from "../context/CatalogContext"
 import { useLanguage } from "../context/LanguageContext"
 import ProductImage from "../components/product/ProductImage"
-import { displayName } from "../lib/format"
+import ProductCard from "../components/product/ProductCard"
+import { displayName, hasProductImage, productHref, seriesSkuLabel } from "../lib/format"
 
 export default function Home() {
   const { t, lang } = useLanguage()
   const { products, categories } = useCatalog()
-  const featured = products.slice(0, 4)
+  const featured = []
+  const seen = new Set()
+  products.forEach((product) => {
+    if (featured.length >= 4) return
+    if (seen.has(product.category)) return
+    if (!hasProductImage(product)) return
+    seen.add(product.category)
+    featured.push(product)
+  })
 
-  // mock data: homepage headline stats for the demo
   const stats = [
-    { value: "500+", label: t.statProducts, icon: Package },
-    { value: "20+", label: t.statCategories, icon: Sparkles },
+    { value: String(products.length), label: t.statProducts, icon: Package },
+    { value: String(Math.max(0, categories.length - 1)), label: t.statCategories, icon: Sparkles },
     { value: t.statOem, label: "Custom", icon: Factory },
     { value: t.statDirect, label: "Supply", icon: Truck },
   ]
@@ -52,8 +60,8 @@ export default function Home() {
         >
           {featured.map((product, index) => (
             <Link
-              key={product.sku}
-              to={`/products/${product.sku}`}
+              key={product.id}
+              to={productHref(product)}
               className={`group overflow-hidden rounded-[14px] border border-line bg-cream shadow-[0_8px_30px_rgba(23,23,23,0.06)] ${
                 index === 1 ? "mt-8" : ""
               } ${index === 2 ? "-mt-4" : ""}`}
@@ -63,7 +71,7 @@ export default function Home() {
               </div>
               <div className="bg-white px-3 py-2.5">
                 <p className="truncate text-sm font-medium">{displayName(product, lang)}</p>
-                <p className="sku text-[11px] text-muted">{product.sku}</p>
+                <p className="sku text-[11px] text-muted">{seriesSkuLabel(product)}</p>
               </div>
             </Link>
           ))}
@@ -131,6 +139,20 @@ export default function Home() {
               </Link>
             )
           })}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-[1280px] px-4 pb-16 sm:px-6">
+        <div className="mb-8 flex items-end justify-between gap-4">
+          <h2 className="text-2xl font-bold sm:text-3xl">{t.allProducts}</h2>
+          <Link to="/products" className="inline-flex items-center gap-1 text-sm font-medium">
+            {t.viewProducts} <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+          {products.slice(0, 8).map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
         </div>
       </section>
     </div>

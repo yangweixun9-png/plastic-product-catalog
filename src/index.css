@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #ffc928;
+  --color-brand-hover: #f5b900;
+  --color-cream: #fff9e8;
+  --color-ink: #171717;
+  --color-muted: #737373;
+  --color-line: #eaeaea;
+  --font-sans: "Plus Jakarta Sans", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", system-ui, sans-serif;
+  --radius-card: 14px;
+  --shadow-card: 0 1px 2px rgb(23 23 23 / 0.04), 0 8px 24px rgb(23 23 23 / 0.04);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
+  color: #171717;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+::selection {
+  background: #ffc928;
+  color: #171717;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.sku {
+  font-variant-ligatures: none;
+  letter-spacing: 0.04em;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

@@ -1,39 +1,25 @@
-import { Link, NavLink, useNavigate } from "react-router-dom"
+import { NavLink, useNavigate } from "react-router-dom"
 import { useState } from "react"
-import { Menu, Search, ShoppingBag, X } from "lucide-react"
+import { Menu, Search, X } from "lucide-react"
 import { useLanguage } from "../../context/LanguageContext"
 import { useQuoteCart } from "../../context/QuoteCartContext"
 import { useCatalog } from "../../context/CatalogContext"
 import { displayName, displayPrice, firstImage, matchingVariant, productHref, productSearchText, seriesSkuLabel } from "../../lib/format"
 import ProductImage from "../product/ProductImage"
+import BrandLogo from "../brand/BrandLogo"
 
 const links = [
-  { to: "/", key: "navHome" },
   { to: "/products", key: "navProducts" },
   { to: "/categories", key: "navCategories" },
   { to: "/new", key: "navNew" },
+  { to: "/about", key: "navAbout" },
   { to: "/contact", key: "navContact" },
 ]
-
-function Logo() {
-  return (
-    <Link to="/" className="flex items-center gap-2.5">
-      <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-brand">
-        <span className="flex h-5 w-5 flex-col justify-between">
-          <span className="h-[3px] rounded-full bg-ink" />
-          <span className="h-[3px] rounded-full bg-ink" />
-          <span className="h-[3px] rounded-full bg-ink" />
-        </span>
-      </span>
-      <span className="text-sm font-extrabold tracking-[0.14em] text-ink">PRODUCT HUB</span>
-    </Link>
-  )
-}
 
 export default function Navbar() {
   const { lang, setLang, t } = useLanguage()
   const { count, setOpen } = useQuoteCart()
-  const { products } = useCatalog()
+  const { storefrontProducts: products } = useCatalog()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [query, setQuery] = useState("")
@@ -53,25 +39,26 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-line bg-white/90 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between gap-4 px-4 sm:px-6">
-          <Logo />
+      <header className="sticky top-0 z-40 border-b border-line bg-white">
+        <div className="mx-auto flex h-[72px] max-w-[1280px] items-center justify-between gap-6 px-4 sm:px-6">
+          <BrandLogo className="h-11 sm:h-[52px]" />
 
-          <nav className="hidden items-center gap-7 lg:flex">
+          <nav className="hidden items-center gap-8 lg:flex">
             {links.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
-                end={link.to === "/"}
                 className={({ isActive }) =>
-                  `text-sm transition ${isActive ? "font-semibold text-ink" : "text-muted hover:text-ink"}`
+                  `relative text-[13px] tracking-[0.04em] transition-colors duration-200 ${
+                    isActive ? "font-semibold text-ink" : "text-muted hover:text-ink"
+                  }`
                 }
               >
                 {({ isActive }) => (
-                  <span className="relative">
+                  <span>
                     {t[link.key]}
                     {isActive && (
-                      <span className="absolute -bottom-2 left-0 h-0.5 w-full rounded-full bg-brand" />
+                      <span className="absolute -bottom-2 left-0 h-px w-full bg-brand" />
                     )}
                   </span>
                 )}
@@ -79,28 +66,29 @@ export default function Navbar() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className="rounded-full p-2 text-ink hover:bg-cream"
+              className="rounded-full p-2 text-ink transition-colors duration-200 hover:bg-cream"
               aria-label={t.search}
             >
               <Search className="h-5 w-5" />
             </button>
 
-            <div className="hidden items-center rounded-full border border-line p-0.5 text-xs font-medium sm:flex">
+            <div className="hidden items-center text-[12px] font-medium sm:flex">
               <button
                 type="button"
                 onClick={() => setLang("zh")}
-                className={`rounded-full px-2.5 py-1 ${lang === "zh" ? "bg-brand text-ink" : "text-muted"}`}
+                className={`px-2 py-1 transition-colors duration-200 ${lang === "zh" ? "text-brand" : "text-muted hover:text-ink"}`}
               >
                 {t.langZh}
               </button>
+              <span className="text-line">/</span>
               <button
                 type="button"
                 onClick={() => setLang("en")}
-                className={`rounded-full px-2.5 py-1 ${lang === "en" ? "bg-brand text-ink" : "text-muted"}`}
+                className={`px-2 py-1 transition-colors duration-200 ${lang === "en" ? "text-brand" : "text-muted hover:text-ink"}`}
               >
                 {t.langEn}
               </button>
@@ -109,14 +97,20 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setOpen(true)}
-              className="relative rounded-full p-2 text-ink hover:bg-cream"
-              aria-label={t.quoteCart}
+              className="hidden items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-[12px] font-medium text-ink transition-colors duration-200 hover:border-brand sm:inline-flex"
             >
-              <ShoppingBag className="h-5 w-5" />
+              {t.quoteList}
+              {count > 0 ? ` (${count})` : ""}
+            </button>
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              className="relative rounded-full p-2 text-ink sm:hidden"
+              aria-label={t.quoteList}
+            >
+              <span className="text-[11px] font-semibold">{t.quoteList}</span>
               {count > 0 && (
-                <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-bold text-ink">
-                  {count}
-                </span>
+                <span className="ml-1 text-[11px] font-semibold text-brand">({count})</span>
               )}
             </button>
 
@@ -133,13 +127,13 @@ export default function Navbar() {
       </header>
 
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 bg-black/30 lg:hidden" onClick={() => setMobileOpen(false)}>
+        <div className="fixed inset-0 z-50 bg-black/20 lg:hidden" onClick={() => setMobileOpen(false)}>
           <div
-            className="absolute right-0 top-0 h-full w-[82%] max-w-sm bg-white p-5 shadow-xl"
+            className="absolute right-0 top-0 h-full w-[84%] max-w-sm bg-white p-6"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="mb-6 flex items-center justify-between">
-              <Logo />
+            <div className="mb-8 flex items-center justify-between">
+              <BrandLogo className="h-10" />
               <button type="button" onClick={() => setMobileOpen(false)}>
                 <X className="h-5 w-5" />
               </button>
@@ -149,29 +143,21 @@ export default function Navbar() {
                 <NavLink
                   key={link.to}
                   to={link.to}
-                  end={link.to === "/"}
                   onClick={() => setMobileOpen(false)}
                   className={({ isActive }) =>
-                    `block rounded-xl px-3 py-3 text-base ${isActive ? "bg-cream font-semibold" : "text-ink"}`
+                    `block px-1 py-3 text-base ${isActive ? "font-semibold text-ink" : "text-muted"}`
                   }
                 >
                   {t[link.key]}
                 </NavLink>
               ))}
             </div>
-            <div className="mt-6 flex items-center rounded-full border border-line p-1 text-sm">
-              <button
-                type="button"
-                onClick={() => setLang("zh")}
-                className={`flex-1 rounded-full py-2 ${lang === "zh" ? "bg-brand" : ""}`}
-              >
+            <div className="mt-8 flex items-center gap-3 text-sm">
+              <button type="button" onClick={() => setLang("zh")} className={lang === "zh" ? "text-brand" : "text-muted"}>
                 中文
               </button>
-              <button
-                type="button"
-                onClick={() => setLang("en")}
-                className={`flex-1 rounded-full py-2 ${lang === "en" ? "bg-brand" : ""}`}
-              >
+              <span className="text-line">/</span>
+              <button type="button" onClick={() => setLang("en")} className={lang === "en" ? "text-brand" : "text-muted"}>
                 EN
               </button>
             </div>
@@ -180,9 +166,9 @@ export default function Navbar() {
       )}
 
       {searchOpen && (
-        <div className="fixed inset-0 z-50 bg-black/35" onClick={() => setSearchOpen(false)}>
+        <div className="fixed inset-0 z-50 bg-black/25" onClick={() => setSearchOpen(false)}>
           <div
-            className="mx-auto mt-16 w-[min(720px,calc(100%-1.5rem))] overflow-hidden rounded-2xl bg-white shadow-2xl"
+            className="mx-auto mt-20 w-[min(720px,calc(100%-1.5rem))] overflow-hidden rounded-2xl border border-line bg-white"
             onClick={(event) => event.stopPropagation()}
           >
             <form
@@ -192,7 +178,7 @@ export default function Navbar() {
                 submitSearch()
               }}
             >
-              <Search className="h-5 w-5 text-muted" />
+              <Search className="h-5 w-5 text-brand" />
               <input
                 autoFocus
                 value={query}
@@ -208,25 +194,26 @@ export default function Navbar() {
               {results.map((product) => {
                 const variant = matchingVariant(product, query)
                 return (
-                <button
-                  key={product.id}
-                  type="button"
-                  onClick={() => {
-                    setSearchOpen(false)
-                    navigate(productHref(product, variant))
-                  }}
-                  className="flex w-full items-center gap-3 rounded-xl p-2 text-left hover:bg-cream"
-                >
-                  <div className="h-12 w-12 overflow-hidden rounded-lg bg-cream">
-                    <ProductImage product={product} src={firstImage(product, variant)} sku={variant?.sku} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{displayName(product, lang)}</p>
-                    <p className="sku text-xs text-muted">SKU: {variant?.sku || seriesSkuLabel(product)}</p>
-                  </div>
-                  <p className="text-sm font-semibold text-brand-hover">{displayPrice(variant || product, lang)}</p>
-                </button>
-              )})}
+                  <button
+                    key={product.id}
+                    type="button"
+                    onClick={() => {
+                      setSearchOpen(false)
+                      navigate(productHref(product, variant))
+                    }}
+                    className="flex w-full items-center gap-3 rounded-xl p-2 text-left hover:bg-cream"
+                  >
+                    <div className="h-12 w-12 overflow-hidden rounded-lg bg-image">
+                      <ProductImage product={product} src={firstImage(product, variant)} sku={variant?.sku} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium">{displayName(product, lang)}</p>
+                      <p className="sku text-xs text-muted">SKU: {variant?.sku || seriesSkuLabel(product)}</p>
+                    </div>
+                    <p className="text-sm font-semibold text-brand">{displayPrice(variant || product, lang)}</p>
+                  </button>
+                )
+              })}
               {query.trim() && results.length === 0 && (
                 <p className="px-3 py-8 text-center text-sm text-muted">{t.noResults}</p>
               )}

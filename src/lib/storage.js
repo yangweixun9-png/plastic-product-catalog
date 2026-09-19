@@ -5,6 +5,7 @@ const KEYS = {
   customers: "product-hub.customers",
   settings: "product-hub.settings",
   lang: "product-hub.lang",
+  adminSession: "product-hub.adminSession",
 }
 
 export function readStore(key, fallback) {

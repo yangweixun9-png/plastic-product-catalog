@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 export function VariantChips({ variants, index, onChange, className = "" }) {
   if (!variants?.length) return null
   return (
-    <div className={`flex min-h-[52px] flex-wrap content-start gap-1 ${className}`}>
+    <div className={`flex flex-wrap content-start gap-1 ${className}`}>
       {variants.map((variant, i) => (
         <button
           key={variant.specId || `${variant.sku}-${i}`}
@@ -14,7 +14,7 @@ export function VariantChips({ variants, index, onChange, className = "" }) {
             onChange(i)
           }}
           className={`rounded-full px-2 py-1 text-[11px] font-medium leading-tight transition ${
-            i === index ? "bg-brand text-ink" : "border border-line text-muted hover:border-ink hover:text-ink"
+            i === index ? "bg-brand text-white" : "border border-line text-muted hover:border-brand hover:text-ink"
           }`}
         >
           {variant.label}

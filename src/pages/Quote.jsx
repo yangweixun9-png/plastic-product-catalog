@@ -42,8 +42,8 @@ export default function QuotePage() {
   if (sent) {
     return (
       <div className="mx-auto max-w-lg px-4 py-24 text-center">
-        <p className="text-2xl font-bold">{t.quoteSuccess}</p>
-        <Link to="/products" className="mt-6 inline-block rounded-full bg-brand px-6 py-3 text-sm font-semibold">
+        <p className="text-2xl font-semibold">{t.quoteSuccess}</p>
+        <Link to="/products" className="mt-6 inline-block rounded-full bg-brand px-6 py-3 text-sm font-medium text-white">
           {t.continueBrowsing}
         </Link>
       </div>
@@ -53,22 +53,22 @@ export default function QuotePage() {
   return (
     <div className="mx-auto grid max-w-[1100px] gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_0.9fr]">
       <section>
-        <h1 className="text-3xl font-bold">{t.quoteTitle}</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">{t.quoteTitle}</h1>
         {items.length === 0 ? (
-          <div className="mt-8 rounded-[14px] border border-dashed border-line py-16 text-center">
+          <div className="mt-8 rounded-xl border border-dashed border-line py-16 text-center">
             <p className="font-medium">{t.quoteEmpty}</p>
             <p className="mt-2 text-sm text-muted">{t.quoteEmptyHint}</p>
-            <Link to="/products" className="mt-5 inline-block text-sm font-medium">
+            <Link to="/products" className="mt-5 inline-block text-sm font-medium text-brand">
               {t.continueBrowsing}
             </Link>
           </div>
         ) : (
-          <div className="mt-6 space-y-4">
+          <div className="mt-6 space-y-3">
             {items.map((item) => {
               const product = findProduct(products, item.id) || findProduct(products, item.sku)
               return (
-                <div key={item.key} className="flex gap-4 rounded-[14px] border border-line p-4">
-                  <div className="h-24 w-24 overflow-hidden rounded-xl bg-cream">
+                <div key={item.key} className="flex gap-4 rounded-xl border border-line p-4">
+                  <div className="h-24 w-24 overflow-hidden rounded-lg bg-image">
                     <ProductImage product={product} sku={item.sku} src={item.image} color={item.color} />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -99,8 +99,8 @@ export default function QuotePage() {
         )}
       </section>
 
-      <section className="rounded-[14px] border border-line p-6">
-        <h2 className="text-xl font-semibold">{t.submitQuote}</h2>
+      <section className="rounded-xl border border-line p-6 lg:sticky lg:top-24 h-fit pb-24 lg:pb-6">
+        <h2 className="text-xl font-semibold">{t.requestQuote}</h2>
         <form className="mt-5 space-y-4" onSubmit={onSubmit}>
           {[
             ["name", t.name, true],
@@ -116,7 +116,7 @@ export default function QuotePage() {
                 type={key === "email" ? "email" : "text"}
                 value={form[key]}
                 onChange={(event) => setForm({ ...form, [key]: event.target.value })}
-                className="w-full rounded-xl border border-line px-3 py-2.5 outline-none focus:border-brand"
+                className="w-full rounded-lg border border-line px-3 py-2.5 outline-none focus:border-brand"
               />
             </label>
           ))}
@@ -126,18 +126,29 @@ export default function QuotePage() {
               rows="4"
               value={form.message}
               onChange={(event) => setForm({ ...form, message: event.target.value })}
-              className="w-full rounded-xl border border-line px-3 py-2.5 outline-none focus:border-brand"
+              className="w-full rounded-lg border border-line px-3 py-2.5 outline-none focus:border-brand"
             />
           </label>
           <button
             type="submit"
             disabled={items.length === 0}
-            className="w-full rounded-full bg-brand py-3 text-sm font-semibold hover:bg-brand-hover disabled:opacity-40"
+            className="w-full rounded-full bg-brand py-3 text-sm font-medium text-white transition-colors duration-200 hover:bg-brand-hover disabled:opacity-40"
           >
-            {t.sendQuote}
+            {t.requestQuote}
           </button>
         </form>
       </section>
+      {items.length > 0 && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white p-3 lg:hidden">
+          <button
+            type="button"
+            onClick={() => document.querySelector("form")?.scrollIntoView({ behavior: "smooth" })}
+            className="w-full rounded-full bg-brand py-3 text-sm font-medium text-white"
+          >
+            {t.requestQuote}
+          </button>
+        </div>
+      )}
     </div>
   )
 }

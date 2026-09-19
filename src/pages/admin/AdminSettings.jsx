@@ -34,7 +34,7 @@ export default function AdminSettings() {
             />
           </label>
         ))}
-        <button type="submit" className="rounded-full bg-brand px-5 py-2.5 text-sm font-semibold hover:bg-brand-hover">
+        <button type="submit" className="rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-hover">
           {t.save}
         </button>
         {saved && <span className="ml-3 text-sm text-muted">Saved</span>}

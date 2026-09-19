@@ -1,16 +1,18 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand: #ffc928;
-  --color-brand-hover: #f5b900;
-  --color-cream: #fff9e8;
+  --color-brand: #a08058;
+  --color-brand-hover: #8c6e48;
+  --color-cream: #f6f2ea;
+  --color-canvas: #fafaf8;
+  --color-image: #f7f7f5;
   --color-ink: #171717;
   --color-muted: #737373;
-  --color-line: #eaeaea;
+  --color-line: #e8e6e1;
   --font-sans: "Plus Jakarta Sans", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
     "Microsoft YaHei", system-ui, sans-serif;
-  --radius-card: 14px;
-  --shadow-card: 0 1px 2px rgb(23 23 23 / 0.04), 0 8px 24px rgb(23 23 23 / 0.04);
+  --radius-card: 12px;
+  --shadow-card: 0 1px 2px rgb(23 23 23 / 0.03);
 }
 
 html {
@@ -31,7 +33,7 @@ body {
 }
 
 ::selection {
-  background: #ffc928;
+  background: #f6f2ea;
   color: #171717;
 }
 
@@ -47,7 +49,7 @@ input[type="number"] {
 
 .sku {
   font-variant-ligatures: none;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -57,4 +59,14 @@ input[type="number"] {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+.btn-gold {
+  background: #a08058;
+  color: #ffffff;
+  transition: background-color 200ms ease, transform 200ms ease;
+}
+
+.btn-gold:hover {
+  background: #8c6e48;
 }

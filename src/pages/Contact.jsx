@@ -23,28 +23,29 @@ export default function Contact() {
   }
 
   return (
-    <div className="mx-auto grid max-w-[1280px] gap-10 px-4 py-12 sm:px-6 lg:grid-cols-2">
+    <div className="mx-auto grid max-w-[1280px] gap-12 px-4 py-14 sm:px-6 lg:grid-cols-2">
       <div>
-        <h1 className="text-3xl font-bold">{t.contactTitle}</h1>
-        <p className="mt-3 max-w-md text-muted">{t.contactSubtitle}</p>
-        <div className="mt-8 space-y-4 text-sm">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand">MUENHUI</p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight">{t.contactTitle}</h1>
+        <p className="mt-4 max-w-md text-muted">{t.contactSubtitle}</p>
+        <div className="mt-10 space-y-4 text-sm">
           <p className="flex items-center gap-3">
-            <MapPin className="h-4 w-4 text-brand-hover" />
+            <MapPin className="h-4 w-4 text-brand" />
             {t.contactFactory} · {settings.country}
           </p>
           <p className="flex items-center gap-3">
-            <Mail className="h-4 w-4 text-brand-hover" />
+            <Mail className="h-4 w-4 text-brand" />
             {settings.email}
           </p>
           <p className="flex items-center gap-3">
-            <MessageCircle className="h-4 w-4 text-brand-hover" />
+            <MessageCircle className="h-4 w-4 text-brand" />
             {settings.whatsapp}
           </p>
           <p className="text-muted">{t.contactHours}</p>
         </div>
       </div>
 
-      <div className="rounded-[14px] border border-line p-6">
+      <div className="rounded-xl border border-line p-6">
         {sent ? (
           <p className="py-10 text-center text-lg font-medium">{t.messageSent}</p>
         ) : (
@@ -63,7 +64,7 @@ export default function Contact() {
                   type={key === "email" ? "email" : "text"}
                   value={form[key]}
                   onChange={(event) => setForm({ ...form, [key]: event.target.value })}
-                  className="w-full rounded-xl border border-line px-3 py-2.5 outline-none focus:border-brand"
+                  className="w-full rounded-lg border border-line px-3 py-2.5 outline-none focus:border-brand"
                 />
               </label>
             ))}
@@ -73,10 +74,10 @@ export default function Contact() {
                 rows="4"
                 value={form.message}
                 onChange={(event) => setForm({ ...form, message: event.target.value })}
-                className="w-full rounded-xl border border-line px-3 py-2.5 outline-none focus:border-brand"
+                className="w-full rounded-lg border border-line px-3 py-2.5 outline-none focus:border-brand"
               />
             </label>
-            <button type="submit" className="w-full rounded-full bg-brand py-3 text-sm font-semibold hover:bg-brand-hover">
+            <button type="submit" className="w-full rounded-full bg-brand py-3 text-sm font-medium text-white transition-colors duration-200 hover:bg-brand-hover">
               {t.sendMessage}
             </button>
           </form>

@@ -29,7 +29,7 @@ export default function QuoteDrawer() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 280 }}
-            className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-white shadow-2xl"
+            className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-white"
           >
             <div className="flex items-center justify-between border-b border-line px-5 py-4">
               <h2 className="text-lg font-semibold">{t.quoteTitle}</h2>
@@ -50,7 +50,7 @@ export default function QuoteDrawer() {
                     const product = findProduct(products, item.id) || findProduct(products, item.sku)
                     return (
                       <div key={item.key} className="flex gap-3 rounded-[14px] border border-line p-3">
-                        <div className="h-20 w-20 overflow-hidden rounded-xl bg-cream">
+                        <div className="h-20 w-20 overflow-hidden rounded-lg bg-image">
                           <ProductImage product={product} sku={item.sku} src={item.image} color={item.color} />
                         </div>
                         <div className="min-w-0 flex-1">
@@ -89,9 +89,9 @@ export default function QuoteDrawer() {
                   setOpen(false)
                   navigate("/quote")
                 }}
-                className="w-full rounded-full bg-brand py-3 text-sm font-semibold text-ink transition hover:bg-brand-hover disabled:opacity-40"
+                className="w-full rounded-full bg-brand py-3 text-sm font-medium text-white transition-colors duration-200 hover:bg-brand-hover disabled:opacity-40"
               >
-                {t.submitQuote}
+                {t.requestQuote}
               </button>
               <Link
                 to="/products"

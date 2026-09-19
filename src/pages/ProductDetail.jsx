@@ -6,7 +6,7 @@ import { useLanguage } from "../context/LanguageContext"
 import { useQuoteCart } from "../context/QuoteCartContext"
 import ProductImage from "../components/product/ProductImage"
 import ProductCard from "../components/product/ProductCard"
-import { VariantArrows, VariantChips, VariantDots } from "../components/product/VariantControls"
+import { VariantArrows, VariantChips } from "../components/product/VariantControls"
 import { colorHex } from "../lib/colors"
 import {
   displayName,
@@ -23,7 +23,7 @@ import { useSwipe } from "../lib/swipe"
 export default function ProductDetail() {
   const { sku } = useParams()
   const [params] = useSearchParams()
-  const { products, categories } = useCatalog()
+  const { storefrontProducts: products, categories } = useCatalog()
   const { t, lang } = useLanguage()
   const { addItem } = useQuoteCart()
   const product = findProduct(products, sku)
@@ -73,17 +73,16 @@ export default function ProductDetail() {
       : product.category
 
   const specs = [
-    [t.specId, specValue(variant?.specId)],
-    [t.sku, specValue(variant?.sku)],
-    [t.variant, specValue(variant?.label)],
     [t.specDimensions, specValue(variant?.size)],
-    [t.specFold, specValue(variant?.foldSize)],
+    [t.specMaterial, specValue(product.material || "PP")],
     [t.specPacking, specValue(variant?.packingQuantity)],
     [t.specCarton, specValue(variant?.cartonSize)],
     [t.specNet, specValue(variant?.netWeight)],
     [t.specGross, specValue(variant?.grossWeight)],
     [t.specHq40, specValue(variant?.hq40)],
-    [t.priceType, specValue(variant?.priceType)],
+    [t.specMoq, specValue(product.moq || variant?.packingQuantity || "—")],
+    [t.specId, specValue(variant?.specId)],
+    [t.specFold, specValue(variant?.foldSize)],
   ]
 
   const related = products.filter((item) => item.category === product.category && item.id !== product.id).slice(0, 4)
@@ -91,7 +90,7 @@ export default function ProductDetail() {
 
   return (
     <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
-      <nav className="mb-6 flex flex-wrap items-center gap-1 text-sm text-muted">
+      <nav className="mb-8 flex flex-wrap items-center gap-1 text-sm text-muted">
         <Link to="/" className="hover:text-ink">{t.breadcrumbHome}</Link>
         <ChevronRight className="h-3.5 w-3.5" />
         <Link to="/products" className="hover:text-ink">{t.allProducts}</Link>
@@ -103,10 +102,10 @@ export default function ProductDetail() {
         <span className="text-ink">{displayName(product, lang)}</span>
       </nav>
 
-      <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+      <div className="grid gap-10 lg:grid-cols-[0.55fr_0.45fr]">
         <div>
           <div
-            className="group relative overflow-hidden rounded-[14px] border border-line bg-cream select-none"
+            className="group relative overflow-hidden rounded-xl border border-line bg-image select-none"
             {...handlers}
             onClick={() => {
               if (swiped.current || thumbs.length < 2) return
@@ -118,61 +117,50 @@ export default function ProductDetail() {
             </div>
             <VariantArrows enabled={canSwipe} onPrev={() => go(-1)} onNext={() => go(1)} />
           </div>
-          <VariantDots
-            count={variants.length}
-            index={index}
-            onChange={(next) => {
-              setIndex(next)
-              setActiveImage(0)
-            }}
-          />
-          {thumbs.length > 1 && (
-            <div className="mt-2 grid grid-cols-4 gap-3">
-              {thumbs.map((src, thumbIndex) => (
-                <button
-                  key={`${src}-${thumbIndex}`}
-                  type="button"
-                  onClick={() => setActiveImage(thumbIndex)}
-                  className={`overflow-hidden rounded-xl border ${
-                    activeImage === thumbIndex ? "border-brand" : "border-line"
-                  }`}
-                >
-                  <div className="aspect-square">
-                    <ProductImage product={product} src={src} color={color} sku={variant?.sku} />
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="mt-3 grid grid-cols-5 gap-2">
+            {(thumbs.length ? thumbs : [currentSrc]).slice(0, 5).map((src, thumbIndex) => (
+              <button
+                key={`${src}-${thumbIndex}`}
+                type="button"
+                onClick={() => setActiveImage(thumbIndex)}
+                className={`overflow-hidden rounded-lg border ${
+                  activeImage === thumbIndex ? "border-brand" : "border-line"
+                }`}
+              >
+                <div className="aspect-square bg-image">
+                  <ProductImage product={product} src={src} color={color} sku={variant?.sku} />
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
 
         <div>
-          <p className="text-sm text-muted">{categoryLabel}</p>
-          <h1 className="mt-2 text-3xl font-bold">{displayName(product, lang)}</h1>
-          <p className="sku mt-2 text-sm font-medium text-muted">SKU: {variant?.sku}</p>
-          <p className="mt-4 text-3xl font-bold text-brand-hover">{displayPrice(variant, lang)}</p>
-          <p className="mt-4 max-w-xl text-sm leading-6 text-muted">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand">{categoryLabel}</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight">{displayName(product, lang)}</h1>
+          <p className="sku mt-2 text-sm text-muted">SKU: {variant?.sku}</p>
+          <p className="mt-5 text-3xl font-semibold text-brand">{displayPrice(variant, lang)}</p>
+          <p className="mt-4 max-w-xl text-sm leading-7 text-muted">
             {lang === "en" ? product.descriptionEn : product.description}
           </p>
 
-          <div className="mt-6">
-            <p className="mb-3 text-sm font-semibold">{t.variant}</p>
-            <VariantChips
-              variants={variants}
-              index={index}
-              onChange={(next) => {
-                setIndex(next)
-                setActiveImage(0)
-              }}
-            />
-          </div>
+          {variants.length > 1 && (
+            <div className="mt-7">
+              <p className="mb-3 text-sm font-medium">{t.variant}</p>
+              <VariantChips
+                variants={variants}
+                index={index}
+                onChange={(next) => {
+                  setIndex(next)
+                  setActiveImage(0)
+                }}
+              />
+            </div>
+          )}
 
           {(product.colors || []).length > 0 && (
-            <div className="mt-6">
-              <p className="mb-3 text-sm font-semibold">
-                {t.color}
-                {color ? ` · ${color}` : ""}
-              </p>
+            <div className="mt-7">
+              <p className="mb-3 text-sm font-medium">{t.availableColors}</p>
               <div className="flex flex-wrap gap-2">
                 {product.colors.map((item) => (
                   <button
@@ -180,11 +168,11 @@ export default function ProductDetail() {
                     type="button"
                     onClick={() => setColor(item)}
                     className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm ${
-                      color === item ? "border-ink bg-cream" : "border-line"
+                      color === item ? "border-brand bg-cream" : "border-line"
                     }`}
                   >
                     <span
-                      className="h-4 w-4 rounded-full border border-black/10"
+                      className="h-3.5 w-3.5 rounded-full border border-black/10"
                       style={{ background: colorHex(item) }}
                     />
                     {item}
@@ -194,43 +182,39 @@ export default function ProductDetail() {
             </div>
           )}
 
-          <div className="mt-8 overflow-hidden rounded-[14px] border border-line">
-            <div className="border-b border-line bg-cream/70 px-4 py-3 text-sm font-semibold">
+          <p className="mt-6 text-sm text-muted">
+            {t.specDimensions}: <span className="text-ink">{specValue(variant?.size)}</span>
+          </p>
+
+          <button
+            type="button"
+            onClick={() => addItem(product, { color, variant })}
+            className="mt-8 w-full rounded-full bg-brand py-3.5 text-sm font-medium text-white transition-colors duration-200 hover:bg-brand-hover"
+          >
+            {t.addToQuote}
+          </button>
+
+          <div className="mt-8 overflow-hidden rounded-xl border border-line">
+            <div className="border-b border-line px-4 py-3 text-sm font-medium">
               {t.specifications}
             </div>
             <table className="w-full text-sm">
               <tbody>
                 {specs.map(([label, value]) => (
                   <tr key={label} className="border-b border-line last:border-0">
-                    <td className="w-[42%] px-4 py-3 text-muted">{label}</td>
-                    <td className="px-4 py-3 font-medium">{value}</td>
+                    <td className="w-[44%] px-4 py-3 text-muted">{label}</td>
+                    <td className="px-4 py-3">{value}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
-
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <button
-              type="button"
-              onClick={() => addItem(product, { color, variant })}
-              className="flex-1 rounded-full bg-brand py-3 text-sm font-semibold hover:bg-brand-hover"
-            >
-              {t.addToQuote}
-            </button>
-            <Link
-              to="/contact"
-              className="flex-1 rounded-full border border-line py-3 text-center text-sm font-semibold hover:border-ink"
-            >
-              {t.contactUs}
-            </Link>
           </div>
         </div>
       </div>
 
       {related.length > 0 && (
         <section className="mt-16">
-          <h2 className="mb-6 text-2xl font-bold">{t.related}</h2>
+          <h2 className="mb-6 text-2xl font-semibold">{t.related}</h2>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
             {related.map((item) => (
               <ProductCard key={item.id} product={item} />

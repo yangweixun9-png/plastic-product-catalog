@@ -74,7 +74,7 @@ export default function ProductImage({
 
   const placeholder = (
     <div
-      className={`relative flex h-full w-full flex-col overflow-hidden bg-cream ${className}`}
+      className={`relative flex h-full w-full flex-col overflow-hidden bg-image ${className}`}
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#fff,transparent_58%)]" />
       <div className="relative flex flex-1 items-center justify-center">
@@ -90,12 +90,12 @@ export default function ProductImage({
   if (!url || failed) return placeholder
 
   return (
-    <div className={`relative h-full w-full overflow-hidden bg-cream ${className}`}>
+    <div className={`relative h-full w-full overflow-hidden bg-image ${className}`}>
       <img
         src={url}
         alt={alt || product?.name || code}
         draggable={false}
-        className="h-full w-full object-contain"
+        className="h-full w-full object-contain transition-transform duration-200 group-hover:scale-[1.03]"
         onError={() => setFailed(true)}
       />
     </div>

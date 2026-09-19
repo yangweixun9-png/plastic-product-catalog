@@ -24,7 +24,7 @@ export default function AdminCategories() {
                 </p>
               </div>
               <Link
-                to={category.id === "all" ? "/products" : `/products?category=${encodeURIComponent(category.id)}`}
+                to="/admin/products"
                 className="text-sm font-medium"
               >
                 {t.viewProducts}

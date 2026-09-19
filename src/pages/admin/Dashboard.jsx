@@ -18,12 +18,13 @@ export default function Dashboard() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Dashboard</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+      <p className="mt-1 text-sm text-muted">{t.manageCatalog}</p>
       <div className="mt-6 grid grid-cols-2 gap-3 xl:grid-cols-4">
         {cards.map((card) => (
-          <div key={card.label} className="rounded-[14px] border border-line bg-white p-5">
-            <card.icon className="h-5 w-5 text-brand-hover" />
-            <p className="mt-4 text-3xl font-bold">{card.value}</p>
+          <div key={card.label} className="rounded-xl border border-line bg-white p-5">
+            <card.icon className="h-5 w-5 text-brand" />
+            <p className="mt-4 text-3xl font-semibold text-brand">{card.value}</p>
             <p className="mt-1 text-sm text-muted">{card.label}</p>
           </div>
         ))}
@@ -43,7 +44,7 @@ export default function Dashboard() {
                 <p className="font-medium">{product.name}</p>
                 <p className="sku text-xs text-muted">{seriesSkuLabel(product)}</p>
               </div>
-              <p className="font-semibold text-brand-hover">{displayPrice(product)}</p>
+              <p className="font-semibold text-brand">{displayPrice(product)}</p>
             </div>
           ))}
         </div>

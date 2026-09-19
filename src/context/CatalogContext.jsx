@@ -29,8 +29,8 @@ export function CatalogProvider({ children }) {
   const [inquiries, setInquiries] = useState(() => readStore("inquiries", []))
   const [settings, setSettings] = useState(() =>
     readStore("settings", {
-      company: "PRODUCT HUB",
-      email: "sales@producthub.demo",
+      company: "MUENHUI",
+      email: "sales@muenhui.com",
       whatsapp: "+86 138 0000 0000",
       country: "China",
     }),
@@ -66,6 +66,36 @@ export function CatalogProvider({ children }) {
 
   const deleteProduct = (id) => {
     persistProducts(products.filter((item) => item.id !== id))
+  }
+
+  const archiveProduct = (id) => {
+    const now = new Date().toISOString().slice(0, 10)
+    persistProducts(
+      products.map((item) => (item.id === id ? { ...item, status: "archived", updatedAt: now } : item)),
+    )
+  }
+
+  const duplicateProduct = (id) => {
+    const source = products.find((item) => item.id === id)
+    if (!source) return
+    const now = new Date().toISOString().slice(0, 10)
+    const copy = {
+      ...source,
+      id: `product-${Date.now()}`,
+      name: `${source.name} copy`,
+      nameEn: source.nameEn ? `${source.nameEn} copy` : "",
+      status: "draft",
+      updatedAt: now,
+      colors: [...(source.colors || [])],
+      variants: (source.variants || []).map((variant) => ({
+        ...variant,
+        sku: variant.sku ? `${variant.sku}-COPY` : variant.sku,
+        specId: variant.specId ? `${variant.specId}-COPY` : variant.specId,
+        images: [...(variant.images || [])],
+      })),
+    }
+    persistProducts([copy, ...products])
+    return copy
   }
 
   const addInquiry = (inquiry) => {
@@ -159,22 +189,30 @@ export function CatalogProvider({ children }) {
     return [...map.values()]
   }, [inquiries])
 
+  const storefrontProducts = useMemo(
+    () => products.filter((item) => !item.status || item.status === "active"),
+    [products],
+  )
+
   const value = useMemo(
     () => ({
       products,
+      storefrontProducts,
       categories: CATEGORIES,
       inquiries,
       customers,
       settings,
       saveProduct,
       deleteProduct,
+      archiveProduct,
+      duplicateProduct,
       addInquiry,
       updateInquiry,
       importProducts,
       resetDemo,
       persistSettings,
     }),
-    [products, inquiries, customers, settings],
+    [products, storefrontProducts, inquiries, customers, settings],
   )
 
   return <CatalogContext.Provider value={value}>{children}</CatalogContext.Provider>

@@ -7,6 +7,7 @@ import { useLanguage } from "../context/LanguageContext"
 import FilterPanel from "../components/product/FilterPanel"
 import ProductCard from "../components/product/ProductCard"
 import { productSearchText, matchingVariantIndex, sortPriceValue, variantMatchesSize, variantMatchesSku, variantPriceInRange } from "../lib/format"
+import { CATEGORIES } from "../data/categories"
 
 const PAGE_SIZE = 24
 
@@ -17,12 +18,14 @@ const emptyFilters = {
   maxPrice: "",
   size: "",
   sku: "",
+  material: "all",
+  availability: "all",
   newOnly: false,
 }
 
-export default function Products({ forcedNew = false, titleKey = "allProducts" }) {
-  const { products } = useCatalog()
-  const { t } = useLanguage()
+export default function Products({ forcedNew = false, titleKey = "productsTitle" }) {
+  const { storefrontProducts: products } = useCatalog()
+  const { t, lang } = useLanguage()
   const [params, setParams] = useSearchParams()
   const [query, setQuery] = useState(params.get("q") || "")
   const [sort, setSort] = useState(params.get("sort") || "default")
@@ -66,8 +69,14 @@ export default function Products({ forcedNew = false, titleKey = "allProducts" }
       if (filters.sku && !variantMatchesSku(product, filters.sku)) {
         return false
       }
+      if (filters.material && filters.material !== "all") {
+        const material = product.material || "PP"
+        if (material !== filters.material) return false
+      }
+      if (filters.availability === "available" && product.status && product.status !== "active") return false
+      if (filters.availability === "draft" && product.status !== "draft") return false
       if ((forcedNew || filters.newOnly) && !product.isNew) return false
-      if (product.status && product.status !== "active") return false
+      if (product.status && product.status !== "active" && filters.availability !== "draft") return false
       return true
     })
 
@@ -111,11 +120,12 @@ export default function Products({ forcedNew = false, titleKey = "allProducts" }
   }
 
   return (
-    <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">{t[titleKey]}</h1>
+    <div className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-semibold tracking-tight">{t[titleKey] || t.productsTitle}</h1>
+        <p className="mt-2 text-muted">{forcedNew ? t.newProductsDesc : t.productsSubtitle}</p>
         <form
-          className="mt-5 flex items-center gap-3 rounded-2xl border border-line bg-white px-4 shadow-[0_8px_30px_rgba(23,23,23,0.04)]"
+          className="mt-6 flex items-center gap-3 rounded-full border border-line bg-white px-4"
           onSubmit={(event) => event.preventDefault()}
         >
           <Search className="h-5 w-5 text-muted" />
@@ -126,7 +136,7 @@ export default function Products({ forcedNew = false, titleKey = "allProducts" }
               syncQuery(event.target.value)
             }}
             placeholder={t.searchPlaceholder}
-            className="h-14 w-full bg-transparent text-base outline-none"
+            className="h-12 w-full bg-transparent text-base outline-none"
           />
           {query && (
             <button
@@ -140,11 +150,28 @@ export default function Products({ forcedNew = false, titleKey = "allProducts" }
             </button>
           )}
         </form>
+        <div className="mt-5 flex gap-2 overflow-x-auto no-scrollbar pb-1">
+          {CATEGORIES.map((category) => {
+            const active = filters.category === category.id
+            return (
+              <button
+                key={category.id}
+                type="button"
+                onClick={() => onFilterChange({ ...filters, category: category.id })}
+                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm transition-colors duration-200 ${
+                  active ? "bg-brand text-white" : "border border-line text-muted hover:border-brand hover:text-ink"
+                }`}
+              >
+                {lang === "en" ? category.nameEn : category.name}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
-      <div className="flex gap-8">
-        <aside className="hidden w-64 shrink-0 lg:block">
-          <div className="sticky top-24 rounded-[14px] border border-line p-5">
+      <div className="flex gap-10">
+        <aside className="hidden w-60 shrink-0 lg:block">
+          <div className="sticky top-24 border-r border-line pr-8">
             <FilterPanel products={products} filters={filters} onChange={onFilterChange} onClear={() => onFilterChange(emptyFilters)} />
           </div>
         </aside>
@@ -152,7 +179,7 @@ export default function Products({ forcedNew = false, titleKey = "allProducts" }
         <div className="min-w-0 flex-1">
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-muted">
-              {t[titleKey]}（{filtered.length}）
+              {filtered.length} {t.results}
             </p>
             <div className="flex items-center gap-2">
               <button
@@ -180,7 +207,7 @@ export default function Products({ forcedNew = false, titleKey = "allProducts" }
           </div>
 
           {pageItems.length === 0 ? (
-            <div className="rounded-[14px] border border-dashed border-line py-20 text-center">
+            <div className="rounded-xl border border-dashed border-line py-20 text-center">
               <p className="font-medium">{t.noResults}</p>
               <p className="mt-2 text-sm text-muted">{t.noResultsHint}</p>
             </div>
@@ -200,7 +227,7 @@ export default function Products({ forcedNew = false, titleKey = "allProducts" }
                   type="button"
                   onClick={() => setPage(index + 1)}
                   className={`h-9 w-9 rounded-full text-sm ${
-                    page === index + 1 ? "bg-brand font-semibold" : "border border-line"
+                    page === index + 1 ? "bg-brand font-medium text-white" : "border border-line"
                   }`}
                 >
                   {index + 1}
@@ -215,17 +242,18 @@ export default function Products({ forcedNew = false, titleKey = "allProducts" }
         {drawerOpen && (
           <div className="fixed inset-0 z-50 lg:hidden">
             <motion.div
-              className="absolute inset-0 bg-black/30"
+              className="absolute inset-0 bg-black/25"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setDrawerOpen(false)}
             />
             <motion.div
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              className="absolute left-0 top-0 h-full w-[86%] max-w-sm overflow-y-auto bg-white p-5 shadow-2xl"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ duration: 0.25 }}
+              className="absolute bottom-0 left-0 max-h-[86vh] w-full overflow-y-auto rounded-t-2xl bg-white p-5"
             >
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="font-semibold">{t.filters}</h3>
